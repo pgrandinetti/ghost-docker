@@ -1,4 +1,9 @@
-{$DOMAIN} {
+{
+	auto_https disable_redirects
+}
+
+#{$DOMAIN} {
+http://, https://{$DOMAIN} {
 	import snippets/Logging
 
 	# Traffic Analytics service
@@ -9,7 +14,12 @@
 
 	# Default proxy everything else to Ghost
 	handle {
-		reverse_proxy ghost:2368
+		reverse_proxy ghost:2368 {
+			# 1. FIX PROTOCOL: Tells Ghost the connection was originally HTTPS
+			header_up X-Forwarded-Proto https
+			# 2. FIX HOST: Ensures Ghost knows it's the main domain (example.com)
+			header_up Host {host}
+		}
 	}
 
 	# Optional: Enable gzip compression
@@ -21,33 +31,38 @@
 
 # Separate admin domains
 # To use a separate domain for Ghost Admin uncomment the block below (recommended)
-# {$ADMIN_DOMAIN} {
-# 	import snippets/Logging
-#
-# 	# Traffic Analytics service
-# 	import snippets/TrafficAnalytics
-#
-# 	# ActivityPub Service
-# 	import snippets/ActivityPub
-#
-# 	# Default proxy everything else to Ghost
-# 	handle {
-# 		reverse_proxy ghost:2368
-# 	}
-#
-# 	# Optional: Enable gzip compression
-# 	encode gzip
-#
-# 	# Optional: Add security headers
-# 	import snippets/SecurityHeaders
-# }
+http://{$ADMIN_DOMAIN}, https://{$ADMIN_DOMAIN} {
+	import snippets/Logging
+
+	# Traffic Analytics service
+	import snippets/TrafficAnalytics
+
+	# ActivityPub Service
+	import snippets/ActivityPub
+
+	# Default proxy everything else to Ghost
+	handle {
+		reverse_proxy ghost:2368 {
+			# 1. FIX PROTOCOL: Tells Ghost the connection was originally HTTPS
+			header_up X-Forwarded-Proto https
+			# 2. FIX HOST: Ensures Ghost knows it's the admin domain (admin.example.com)
+			header_up Host {host}
+		}
+	}
+
+	# Optional: Enable gzip compression
+	encode gzip
+
+	# Optional: Add security headers
+	import snippets/SecurityHeaders
+}
 
 # Redirect www -> root domain
 # To redirect the www variant of your domain to the non-www variant uncomment the 4 lines below
 # Note: You must have DNS setup correctly for both domains for this to work
 # www.{$DOMAIN} {
-# 	import snippets/Logging
-# 	redir https://{$DOMAIN}{uri}
+#	 import snippets/Logging
+#	 redir https://{$DOMAIN}{uri}
 # }
 
 # Redirect root -> www domain
@@ -55,6 +70,6 @@
 # Note: You must have DNS setup correctly for both domains for this to work
 # When using ActivityPub with a www. domain, you must enable this redirect for ActivityPub to work correctly
 # CHANGE_ME {
-# 	import snippets/Logging
-# 	redir https://{$DOMAIN}{uri}
+#	 import snippets/Logging
+#	 redir https://{$DOMAIN}{uri}
 # }
