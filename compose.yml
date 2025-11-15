@@ -11,7 +11,7 @@ services:
         - ghost_network
 
   caddy:
-    image: caddy:2.10.0-alpine@sha256:e2e3a089760c453bc51c4e718342bd7032d6714f15b437db7121bfc2de2654a6
+    image: caddy:2.10.2-alpine@sha256:953131cfea8e12bfe1c631a36308e9660e4389f0c3dfb3be957044d3ac92d446
     restart: always
     ports:
       - "80:80"
@@ -33,8 +33,6 @@ services:
     # Do not alter this without updating the Tinybird Sync container as well
     image: ghost:${GHOST_VERSION:-6-alpine}
     restart: always
-    expose:
-      - "127.0.0.1:${GHOST_PORT:-2368}:2368"
     # This is required to import current config when migrating
     env_file:
       - .env
@@ -70,7 +68,7 @@ services:
       - ghost_network
 
   db:
-    image: mysql:8.0.42@sha256:4445b2668d41143cb50e471ee207f8822006249b6859b24f7e12479684def5d9
+    image: mysql:8.0.44@sha256:f37951fc3753a6a22d6c7bf6978c5e5fefcf6f31814d98c582524f98eae52b21
     restart: always
     expose:
       - "3306"
@@ -93,7 +91,7 @@ services:
       - ghost_network
 
   traffic-analytics:
-    image: ghost/traffic-analytics:1.0.16@sha256:9bfdad7f32661f7fc2c0eb32bbf096d43e358ec416dffc7ca6df58185cb0cde3
+    image: ghost/traffic-analytics:1.0.20@sha256:a72573d89457e778b00e9061422516d2d266d79a72a0fc02005ba6466e391859
     restart: always
     expose:
       - "3000"
@@ -135,7 +133,7 @@ services:
     networks:
       - ghost_network
 
-  # Suporting Services
+  # Supporting Services
 
   tinybird-login:
     build:
